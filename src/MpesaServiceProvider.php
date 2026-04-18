@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace FelixMuhoro\Mpesa;
 
 use FelixMuhoro\Mpesa\Contracts\MpesaInterface;
+use FelixMuhoro\Mpesa\Events\PaymentFailed;
+use FelixMuhoro\Mpesa\Events\PaymentSuccessful;
+use FelixMuhoro\Mpesa\Events\StkPushInitiated;
 use FelixMuhoro\Mpesa\Http\Middleware\VerifyMpesaCallback;
+use FelixMuhoro\Mpesa\Listeners\LogMpesaTransaction;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class MpesaServiceProvider extends ServiceProvider
@@ -43,6 +48,14 @@ class MpesaServiceProvider extends ServiceProvider
 
         if ($this->app['config']->get('mpesa.callback.register_routes', true)) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/mpesa.php');
+        }
+
+        // Persist every STK Push and its terminal state into mpesa_transactions.
+        // Gated by config('mpesa.database.log_transactions') — default true.
+        if ($this->app['config']->get('mpesa.database.log_transactions', true)) {
+            Event::listen(StkPushInitiated::class,  [LogMpesaTransaction::class, 'onStkPushInitiated']);
+            Event::listen(PaymentSuccessful::class, [LogMpesaTransaction::class, 'onPaymentSuccessful']);
+            Event::listen(PaymentFailed::class,     [LogMpesaTransaction::class, 'onPaymentFailed']);
         }
     }
 

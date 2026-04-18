@@ -9,6 +9,10 @@ use FelixMuhoro\Mpesa\DTOs\StkPushResponse;
 use FelixMuhoro\Mpesa\DTOs\StkQueryResponse;
 use FelixMuhoro\Mpesa\Enums\Environment;
 use FelixMuhoro\Mpesa\Enums\ResultCode;
+use FelixMuhoro\Mpesa\Events\PaymentFailed as PaymentFailedEvent;
+use FelixMuhoro\Mpesa\Events\PaymentSuccessful as PaymentSuccessfulEvent;
+use FelixMuhoro\Mpesa\Events\StkPushInitiated;
+use FelixMuhoro\Mpesa\DTOs\CallbackPayload;
 use FelixMuhoro\Mpesa\Exceptions\AuthException;
 use FelixMuhoro\Mpesa\Exceptions\MpesaException;
 use FelixMuhoro\Mpesa\Support\PhoneNumber;
@@ -122,7 +126,18 @@ class Mpesa implements MpesaInterface
             );
         }
 
-        return StkPushResponse::fromArray($data);
+        $pushResponse = StkPushResponse::fromArray($data);
+
+        event(new StkPushInitiated(
+            phone:          $phone,
+            amount:         $amount,
+            reference:      (string) $payload['AccountReference'],
+            description:    (string) $payload['TransactionDesc'],
+            response:       $pushResponse,
+            requestPayload: $payload,
+        ));
+
+        return $pushResponse;
     }
 
     public function stkQuery(string $checkoutRequestId): StkQueryResponse
@@ -149,7 +164,33 @@ class Mpesa implements MpesaInterface
             );
         }
 
-        return StkQueryResponse::fromArray($data);
+        $queryResponse = StkQueryResponse::fromArray($data);
+
+        // If polling reveals a terminal state but no callback has arrived yet
+        // (common when the app's callback URL isn't reachable — e.g. HTTP in
+        // production, or the server was down), synthesise the corresponding
+        // event so listeners/DB rows converge on the real result.
+        if ($queryResponse->isCompleted() || $queryResponse->isFailed()) {
+            $synthetic = new CallbackPayload(
+                merchantRequestId:  (string) ($data['MerchantRequestID'] ?? ''),
+                checkoutRequestId:  $checkoutRequestId,
+                resultCode:         $queryResponse->resultCode,
+                resultDesc:         $queryResponse->resultDesc ?: $queryResponse->message,
+                mpesaReceiptNumber: null,
+                amount:             null,
+                phoneNumber:        null,
+                transactionDate:    null,
+                raw:                $data,
+            );
+
+            if ($queryResponse->isCompleted()) {
+                event(new PaymentSuccessfulEvent($synthetic));
+            } else {
+                event(new PaymentFailedEvent($synthetic));
+            }
+        }
+
+        return $queryResponse;
     }
 
     // ─────────────────────────────────────────────────────────────

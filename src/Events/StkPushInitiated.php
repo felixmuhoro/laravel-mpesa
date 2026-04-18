@@ -12,6 +12,8 @@ class StkPushInitiated
         public readonly string $phone,
         public readonly int $amount,
         public readonly string $reference,
+        public readonly string $description,
         public readonly StkPushResponse $response,
+        public readonly array $requestPayload = [],
     ) {}
 }
