@@ -4,14 +4,14 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/felixmuhoro/laravel-mpesa.svg?style=flat-square)](https://packagist.org/packages/felixmuhoro/laravel-mpesa)
 [![License](https://img.shields.io/packagist/l/felixmuhoro/laravel-mpesa.svg?style=flat-square)](LICENSE)
 
-A modern, fully-typed **M-Pesa Daraja 2.0** integration for **Laravel 10 / 11 / 12**.
+A modern, fully-typed **M-Pesa Daraja 2.0** integration for **Laravel 10 / 11 / 12 / 13**.
 Battle-tested in production against real customer traffic — including the undocumented error codes Safaricom's own docs don't mention.
 
 ## Why this package
 
 Most M-Pesa Laravel packages on Packagist were built for Laravel 7/8 and return raw arrays. This one is different:
 
-- **Laravel 10 / 11 / 12** first-class — PHP 8.1+ enums, readonly DTOs, typed properties
+- **Laravel 10 / 11 / 12 / 13** first-class — PHP 8.1+ enums, readonly DTOs, typed properties
 - **Exhaustive result-code dictionary** — 15+ Safaricom codes mapped including the undocumented `4999` (still processing, NOT failed)
 - **Correct async handling** — STK query correctly distinguishes "payment pending" from "payment failed" so you never mark a successful payment as failed because you polled too early
 - **Events-driven** — `PaymentSuccessful`, `PaymentFailed`, `StkPushInitiated` dispatched on every terminal state
@@ -193,7 +193,7 @@ composer test
 
 | Package | PHP       | Laravel         |
 |---------|-----------|-----------------|
-| 1.x     | 8.1 – 8.3 | 10, 11, 12      |
+| 1.x     | 8.1 – 8.4 | 10, 11, 12, 13  |
 
 ## Credits
 
