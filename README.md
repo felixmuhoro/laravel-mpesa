@@ -7,6 +7,29 @@
 A modern, fully-typed **M-Pesa Daraja 2.0** integration for **Laravel 10 / 11 / 12 / 13**.
 Battle-tested in production against real customer traffic — including the undocumented error codes Safaricom's own docs don't mention.
 
+## Quick start
+
+```bash
+composer require felixmuhoro/laravel-mpesa
+```
+
+```php
+use FelixMuhoro\Mpesa\Facades\Mpesa;
+
+$response = Mpesa::stkPush(
+    phone: '0712345678',
+    amount: 100,
+    reference: 'ORDER-1234',
+    description: 'Payment for order 1234',
+);
+
+if ($response->accepted()) {
+    // Persist $response->checkoutRequestId to reconcile with the callback
+}
+```
+
+Full setup, callbacks, C2B, B2C, and result-code handling below.
+
 ## Why this package
 
 Most M-Pesa Laravel packages on Packagist were built for Laravel 7/8 and return raw arrays. This one is different:
