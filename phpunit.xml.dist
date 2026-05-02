@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="MPESA_ENVIRONMENT" value="sandbox"/>
+        <env name="MPESA_CONSUMER_KEY" value="test_key"/>
+        <env name="MPESA_CONSUMER_SECRET" value="test_secret"/>
+        <env name="MPESA_STK_SHORT_CODE" value="174379"/>
+        <env name="MPESA_STK_PASSKEY" value="bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"/>
+        <env name="MPESA_STK_CALLBACK_URL" value="https://example.test/mpesa/callback/stk"/>
+    </php>
+</phpunit>
